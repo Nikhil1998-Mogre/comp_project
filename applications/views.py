@@ -1,5 +1,5 @@
 # views.py
-
+# hi nikhil
 from django.shortcuts import render
 from django.http import HttpResponse
 
