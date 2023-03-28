@@ -1,10 +1,12 @@
 # views.py
-# hi nikhil
-from django.shortcuts import render
+# hi nikhil mogre
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
+from applications.models import Job
 
 from django.db import models
 import numpy as np
+import pandas as pd
 import time
 import json
 import re
@@ -16,21 +18,48 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
+
 #user input
 def user_input(request):
     return render(request,'applications/job.html')
 
 
-
+# start scraping after selecting location from user
 def linked_jobs(request):
+    # new list
+    lst=[]
+
+    # recieve user_input 
     if request.method == 'GET':
         # Retrieve filter values from frontend
         location_filter = request.GET.get('location', '')
         output = find(location_filter)
-    return render(request,'applications/job.html',{'a':output})
+
+
+    for i in range(len(output['job_role'])):
+        lst.append((('company',output['company'][i]),('job_role',output['job_role'][i]),('Location',output['Location'][i]),('Posted_date',output['Posted_date'][i]),
+                   ('JD',output['JD'][i]),('location_filter',location_filter)))
+
+    return render(request,'applications/job2.html',{'data':lst})
+
+
+# user_saved_company_function
+def save_company(request):
+    if request.method == 'POST':
+        print('saved')
+
+        #received data from after saving
+        saved_data = request.POST.get('company_name')
+        print(saved_data)
+        print(saved_data[2])
+        database = Job(Company=saved_data[0][1], Location=saved_data[2][1], JD=saved_data[4][1], posted_=saved_data[3][1], job_role=saved_data[1][1])
+        
+        # database.save()
+    return redirect('/')
 
 
 
+# web_scraping
 def find(location):
     from selenium import webdriver
     import time
@@ -72,7 +101,7 @@ def find(location):
             link.append(i.get_attribute('href'))
 
         #call fun_2
-        fun_2(link)
+        return fun_2(link)
 
 
 #2nd function
@@ -82,7 +111,7 @@ def fun_2(link):
         if 'jobs/view/' in i:
             job_link.append(i)
 
-    fun_3(job_link)
+    return fun_3(job_link)
 
 # 3rd function
 def fun_3(job_link):
@@ -91,37 +120,41 @@ def fun_3(job_link):
     Location = []
     Posted_date = []
     JD = []
+    c=0
 
     for i in job_link:
-    # for i in job_link:
-        driver = webdriver.Chrome("C:\Chrome web =driver\chromedriver_win32\chromedriver.exe")
-        driver.get(i)
-        try:
-            see_more = driver.find_element(By.XPATH,'//*[@id="main-content"]/section[1]/div/div/section[1]/div/div/section/button[1]')
-            see_more.click()
-        except:
-            pass
+        if c<2:
+            driver = webdriver.Chrome("C:\Chrome web =driver\chromedriver_win32\chromedriver.exe")
+            driver.get(i)
+            try:
+                see_more = driver.find_element(By.XPATH,'//*[@id="main-content"]/section[1]/div/div/section[1]/div/div/section/button[1]')
+                see_more.click()
+            except:
+                pass
 
-        try:
-            job_role.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h1').text)
-        except:
-            job_role.append(np.nan)
-        try:
-            company.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h4/div[1]/span[1]/a').text)
-        except:
-            company.append(np.nan)
-        try:
-            Location.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h4/div[1]/span[2]').text)
-        except:
-            Location.append(np.nan)
-        try:
-            Posted_date.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h4/div[2]/span[1]').text)
-        except:
-            Posted_date.append(np.nan)
-        try:
-            JD.append(driver.find_element(By.CLASS_NAME, 'show-more-less-html__markup').text)
-        except:
-            JD.append(np.nan)
+            try:
+                job_role.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h1').text)
+            except:
+                job_role.append(np.nan)
+            try:
+                company.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h4/div[1]/span[1]/a').text)
+            except:
+                company.append(np.nan)
+            try:
+                Location.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h4/div[1]/span[2]').text)
+            except:
+                Location.append(np.nan)
+            try:
+                Posted_date.append(driver.find_element(By.XPATH, '//*[@id="main-content"]/section[1]/div/section[2]/div/div[1]/div/h4/div[2]/span[1]').text)
+            except:
+                Posted_date.append(np.nan)
+            try:
+                JD.append(driver.find_element(By.CLASS_NAME, 'show-more-less-html__markup').text)
+            except:
+                JD.append(np.nan)
+            c+=1
+        else:
+            break
 
 
     d={'job_role':job_role,'company':company,'Location':Location,'Posted_date':Posted_date,'JD':JD}

@@ -7,4 +7,4 @@ from .models import Job
 
 @admin.register(Job)
 class Job_admin(admin.ModelAdmin):
-    list_display = ("id", "Company", "Location", "JD", "posted", "link")
+    list_display = ("Company", "Location", "JD", "posted", "job_role")

@@ -1,12 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>file</title>
+	<title>Dictionary Values</title>
 </head>
 <body>
-    <h2>{{a}}}</h2>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Job Listings</title>
+</head>
+<body>
+
+	 <table>
+    
+        {% for item in data %}
+            {% for i,j in item %}
+                {% if i == 'JD' %}
+                    <p><strong>Job Description:</strong></p>
+                        <p>
+                            <button class="show-desc">Show</button>
+                        </p>
+                        <div class="job-desc">
+                            <p>{{ j }}</p>
+                        </div>
+                {% elif i != 'location_filter' %}
+                    {{i}}  ----> {{j}}<br><br>
+
+                {% endif %}
+            {% endfor %}
+            <form method="POST" action="{% url 'save_company' %}">
+                {% csrf_token %}
+                <input type="hidden" name="company_name" value="{{ item }} ">
+                
+                <button type="submit">Save</button>
+            </form>
+            <br><br><br><br>
+
+        {% endfor %}
+
+	</table> 
+</body>
+</html>
+
+
 </body>
 </html>
