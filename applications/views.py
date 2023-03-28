@@ -50,8 +50,8 @@ def save_company(request):
 
         #received data from after saving
         saved_data = request.POST.get('company_name')
-        print(saved_data)
-        print(saved_data[2])
+
+        # print(saved_data[2])
         database = Job(Company=saved_data[0][1], Location=saved_data[2][1], JD=saved_data[4][1], posted_=saved_data[3][1], job_role=saved_data[1][1])
         
         # database.save()
